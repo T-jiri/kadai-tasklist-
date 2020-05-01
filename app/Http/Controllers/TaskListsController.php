@@ -37,7 +37,7 @@ class TaskListsController extends Controller
     
      public function destroy($id)
     {
-        $task = \App\TaskList::find($id);
+        $task = \App\Task::find($id);
 
         if (\Auth::id() === $task->user_id) {
             $task->delete();

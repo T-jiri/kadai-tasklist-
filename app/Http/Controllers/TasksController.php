@@ -13,12 +13,18 @@ class TasksController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-    $tasks = Task::paginate(25);
-
-        return view('welcome', [
-            'tasks' => $tasks,
-        ]);
+    { $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+            
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
+        }
+        
+        return view('welcome', $data);
     }
 
     /**
@@ -43,15 +49,16 @@ class TasksController extends Controller
      */
     public function store(Request $request)
     {
+   
         $this->validate($request, [
             'status' => 'required|max:10',  
             'content' => 'required|max:191',
         ]);
         
-         $task = new Task;
-        $task->content = $request->content;
-        $task->status = $request->status; 
-        $task->save();
+
+        $request->user()->tasks()->create([
+            'content' => $request->content,'status' => $request->status,
+        ]);
 
         return redirect('/');
     }
@@ -116,9 +123,13 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
-    
-        $task = Task::find($id);
-        $task->delete();
-         return redirect('/');
+     $task = \App\Task::find($id);
+
+        if (\Auth::id() === $task->user_id) {
+            $task->delete();
+            $task = Task::find($id);
+            $task->delete();
+            return redirect('/');
+        }
     }
 }

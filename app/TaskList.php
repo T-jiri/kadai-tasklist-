@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TaskList extends Model
 {
-    
+     
     protected $fillable = ['content', 'user_id'];
      
 
